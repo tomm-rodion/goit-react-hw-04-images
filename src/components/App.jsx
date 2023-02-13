@@ -1,4 +1,6 @@
-// import React, { Component } from 'react';
+import React from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
 import { Button } from './Button/Button';
@@ -6,7 +8,7 @@ import { fetchImg } from './Service/FetchImages';
 import { Searchbar } from './SearchBar/SearchBar';
 import { useState, useEffect } from 'react';
 
-export function App() {
+export const App = () => {
   const [query, setQuery] = useState('');
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
@@ -25,17 +27,24 @@ export function App() {
 
         const resp = await fetchImg(query, page);
         setTotalImgs(resp.totalHits);
-        console.log(resp);
 
-        setImages(images => {
-          if (page === 1) {
-            return [...resp.hits];
-          } else {
-            return [...images, ...resp.hits];
-          }
-        });
+        if (resp.totalHits === 0) {
+          toast.warn(
+            'На даний запит в нас немає зображень 🙄 спробуйте пошукати щось подібне!'
+          );
+          setIsLoading(false);
+          return;
+        } else {
+          setImages(images => {
+            if (page === 1) {
+              return [...resp.hits];
+            } else {
+              return [...images, ...resp.hits];
+            }
+          });
+        }
       } catch (error) {
-        setError(
+        toString(
           'Упс, щось пішло не так, спробуйте перезавантажити сторінку! 🙄'
         );
       } finally {
@@ -50,9 +59,23 @@ export function App() {
     setIsLoading(true);
   };
 
-  const handleSubmit = query => {
-    setQuery(query);
-    setIsLoading(true);
+  // const handleSubmit = query => {
+  //   setQuery(query);
+  //   setIsLoading(true);
+  // };
+
+  const handleSubmit = event => {
+    event.preventDefault();
+    const { value } = event.target.elements.query;
+    if (value.trim() === '') {
+      setImages([]);
+      setTotalImgs(0);
+      return toast(
+        'Оууу, поле пошуку пусте! Введіть якесь значення для пошуку зображення !'
+      );
+    } else {
+      setQuery(value);
+    }
   };
 
   const renderButtonOnLoader = () => {
@@ -77,9 +100,10 @@ export function App() {
         alignItems: 'center',
       }}
     >
+      <ToastContainer />
       <Searchbar onSubmit={handleSubmit} />
       <ImageGallery images={images} />
       {renderButtonOnLoader()}
     </div>
   );
-}
+};

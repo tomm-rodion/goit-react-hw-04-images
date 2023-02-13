@@ -8,7 +8,7 @@ axios.defaults.baseURL = 'https://pixabay.com/api/';
 
 export async function fetchImg(query, page) {
   const respons = await axios.get(
-    `?key=${params.key}&q=${query}${params.options}&per_page=12&page=${page}`
+    `?key=${params.key}&q=${query}${params.options}&per_page=10&page=${page}`
   );
   return respons.data;
 }
