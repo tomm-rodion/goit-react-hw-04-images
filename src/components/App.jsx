@@ -44,7 +44,7 @@ export const App = () => {
           });
         }
       } catch (error) {
-        toString(
+        toast.error(
           'Упс, щось пішло не так, спробуйте перезавантажити сторінку! 🙄'
         );
       } finally {
@@ -58,11 +58,6 @@ export const App = () => {
     setPage(page => page + 1);
     setIsLoading(true);
   };
-
-  // const handleSubmit = query => {
-  //   setQuery(query);
-  //   setIsLoading(true);
-  // };
 
   const handleSubmit = event => {
     event.preventDefault();
