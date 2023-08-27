@@ -11,9 +11,14 @@ export const ImageGalleryItem = ({ image }) => {
 
   return (
     <>
-      <li onClick={handleToggleModal} className="ImageGalleryItem">
+      <li
+        onClick={handleToggleModal}
+        className="ImageGalleryItem"
+        role="button"
+      >
         <img
           className="ImageGalleryItem-image"
+          loading="lazy"
           src={image.webformatURL}
           alt="img"
         />

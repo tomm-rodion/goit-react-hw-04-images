@@ -1,4 +1,5 @@
 import React from 'react';
+import { nanoid } from 'nanoid';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ImageGallery } from './ImageGallery/ImageGallery';
@@ -25,7 +26,8 @@ export const App = () => {
         setIsLoading(true);
         setError(null);
 
-        const resp = await fetchImg(query, page);
+        const parsQuery = query.slice(query.indexOf('/' + 1));
+        const resp = await fetchImg(parsQuery, page);
         setTotalImgs(resp.totalHits);
 
         if (resp.totalHits === 0) {
@@ -55,32 +57,33 @@ export const App = () => {
   }, [page, query, totalImgs, error]);
 
   const handleLoadMore = () => {
-    setPage(page => page + 1);
+    setPage(prevPage => prevPage + 1);
     setIsLoading(true);
   };
 
   const handleSubmit = event => {
     event.preventDefault();
     const { value } = event.target.elements.query;
+    setImages([]);
+    setTotalImgs(0);
+    setPage(1);
+
     if (value.trim() === '') {
-      setImages([]);
-      setTotalImgs(0);
       return toast(
         'Оууу, поле пошуку пусте! Введіть якесь значення для пошуку зображення !'
       );
     } else {
-      setQuery(value);
+      setQuery(`${nanoid()}/${value}`);
+      console.log(`${nanoid()}/${value}`);
+      resetQuery(event);
     }
   };
 
-  const renderButtonOnLoader = () => {
-    return isLoading ? (
-      <Loader />
-    ) : (
-      images !== 0 && images.length < totalImgs && (
-        <Button onClick={handleLoadMore} />
-      )
-    );
+  // Скидаємо значення поля ввода на порожню строку ''
+  const resetQuery = event => (event.target.elements.query.value = '');
+
+  const showButtonLoadMore = () => {
+    return !isLoading && images !== 0 && images.length < totalImgs;
   };
 
   return (
@@ -98,7 +101,8 @@ export const App = () => {
       <ToastContainer />
       <Searchbar onSubmit={handleSubmit} />
       <ImageGallery images={images} />
-      {renderButtonOnLoader()}
+      {isLoading && <Loader />}
+      {showButtonLoadMore() && <Button onClick={handleLoadMore} />}
     </div>
   );
 };
