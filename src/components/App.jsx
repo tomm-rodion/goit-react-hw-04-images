@@ -7,7 +7,7 @@ import { Loader } from './Loader/Loader';
 import { Button } from './Button/Button';
 import { fetchImg } from './Service/FetchImages';
 import { Searchbar } from './SearchBar/SearchBar';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export const App = () => {
   const [query, setQuery] = useState('');
@@ -85,6 +85,16 @@ export const App = () => {
   const showButtonLoadMore = () => {
     return !isLoading && images !== 0 && images.length < totalImgs;
   };
+  const showButtonScrollToForm = () => {
+    return !isLoading && page >= 2;
+  };
+  const formRef = useRef();
+
+  const handleScrollToForm = () => {
+    console.log(formRef);
+    const dims = formRef.current.getBoundingClientRect();
+    window.scrollTo({ top: dims.top, behavior: 'smooth' });
+  };
 
   return (
     <div
@@ -99,10 +109,18 @@ export const App = () => {
       }}
     >
       <ToastContainer />
-      <Searchbar onSubmit={handleSubmit} />
+      <Searchbar onSubmit={handleSubmit} formRef={formRef} />
       <ImageGallery images={images} />
       {isLoading && <Loader />}
-      {showButtonLoadMore() && <Button onClick={handleLoadMore} />}
+      {showButtonLoadMore() && (
+        <Button onClick={handleLoadMore} children={'Load More '} />
+      )}
+      {showButtonScrollToForm() && (
+        <Button
+          onClick={handleScrollToForm}
+          children={'Scroll to form search'}
+        />
+      )}
     </div>
   );
 };
