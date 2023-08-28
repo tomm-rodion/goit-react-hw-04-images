@@ -15,7 +15,6 @@ export const App = () => {
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [totalImgs, setTotalImgs] = useState(0);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!query) {
@@ -24,7 +23,6 @@ export const App = () => {
     async function fetchImgage() {
       try {
         setIsLoading(true);
-        setError(null);
 
         const parsQuery = query.split('/')[1];
         const resp = await fetchImg(parsQuery, page);
@@ -33,7 +31,6 @@ export const App = () => {
           toast.warn(
             'На даний запит в нас немає зображень 🙄 спробуйте пошукати щось подібне!'
           );
-          setIsLoading(false);
           return;
         }
 
@@ -43,7 +40,6 @@ export const App = () => {
         toast.error(
           'Упс, щось пішло не так, спробуйте перезавантажити сторінку! 🙄'
         );
-        console.log(error);
       } finally {
         setIsLoading(false);
       }
@@ -53,7 +49,6 @@ export const App = () => {
 
   const handleLoadMore = () => {
     setPage(prevPage => prevPage + 1);
-    setIsLoading(true);
   };
 
   const handleSubmit = event => {
@@ -71,11 +66,10 @@ export const App = () => {
     }
 
     setQuery(`${nanoid()}/${value}`);
-    resetQuery(event);
-  };
 
-  // Скидаємо значення поля ввода на порожню строку ''
-  const resetQuery = event => (event.target.elements.query.value = '');
+    // Скидаємо значення поля ввода на порожню строку ''
+    event.target.reset();
+  };
 
   const showButtonLoadMore = () => {
     return !isLoading && images.length !== totalImgs;
