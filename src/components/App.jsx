@@ -26,9 +26,8 @@ export const App = () => {
         setIsLoading(true);
         setError(null);
 
-        const parsQuery = query.slice(query.indexOf('/' + 1));
+        const parsQuery = query.split('/')[1];
         const resp = await fetchImg(parsQuery, page);
-        setTotalImgs(resp.totalHits);
 
         if (resp.totalHits === 0) {
           toast.warn(
@@ -36,25 +35,21 @@ export const App = () => {
           );
           setIsLoading(false);
           return;
-        } else {
-          setImages(images => {
-            if (page === 1) {
-              return [...resp.hits];
-            } else {
-              return [...images, ...resp.hits];
-            }
-          });
         }
+
+        setTotalImgs(resp.totalHits);
+        setImages(prevImages => [...prevImages, ...resp.hits]);
       } catch (error) {
         toast.error(
           'Упс, щось пішло не так, спробуйте перезавантажити сторінку! 🙄'
         );
+        console.log(error);
       } finally {
         setIsLoading(false);
       }
     }
     fetchImgage();
-  }, [page, query, totalImgs, error]);
+  }, [page, query]);
 
   const handleLoadMore = () => {
     setPage(prevPage => prevPage + 1);
@@ -63,27 +58,27 @@ export const App = () => {
 
   const handleSubmit = event => {
     event.preventDefault();
-    const { value } = event.target.elements.query;
+    const { value } = event.target.query;
     setImages([]);
     setTotalImgs(0);
     setPage(1);
 
     if (value.trim() === '') {
-      return toast(
+      toast(
         'Оууу, поле пошуку пусте! Введіть якесь значення для пошуку зображення !'
       );
-    } else {
-      setQuery(`${nanoid()}/${value}`);
-      console.log(`${nanoid()}/${value}`);
-      resetQuery(event);
+      return;
     }
+
+    setQuery(`${nanoid()}/${value}`);
+    resetQuery(event);
   };
 
   // Скидаємо значення поля ввода на порожню строку ''
   const resetQuery = event => (event.target.elements.query.value = '');
 
   const showButtonLoadMore = () => {
-    return !isLoading && images !== 0 && images.length < totalImgs;
+    return !isLoading && images.length !== totalImgs;
   };
   const showButtonScrollToForm = () => {
     return !isLoading && page >= 2;
